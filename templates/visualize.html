@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Visualizations</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+
+    <style>
+        /* --- Root Variables for Easy Themeing --- */
+        :root {
+            --primary-color: #367BF5; /* A nice, modern blue */
+            --bg-color: #f4f7f9;
+            --card-bg-color: #ffffff;
+            --text-color: #333;
+            --light-text-color: #666;
+            --border-color: #e6e9ed;
+            --pre-bg-color: #2d3748; /* Dark background for code blocks */
+            --pre-text-color: #e2e8f0;
+            --shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        /* --- Basic Reset & Body Styling --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 2rem;
+        }
+
+        /* --- Main Content Container --- */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* --- Headers --- */
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            color: var(--text-color);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        /* --- Card Layout for Each Section --- */
+        .card {
+            background-color: var(--card-bg-color);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* --- Styled <pre> Blocks for Data --- */
+        pre {
+            background-color: var(--pre-bg-color);
+            color: var(--pre-text-color);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Fira Code', 'Courier New', monospace; /* A nice coding font */
+            font-size: 0.9rem;
+        }
+
+        /* --- Chart Canvas Styling --- */
+        canvas {
+            max-width: 100%;
+            margin-top: 1rem;
+        }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+            h1 { font-size: 2rem; }
+            h2 { font-size: 1.25rem; }
+            .card { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>CSV Visual Insights</h1>
+
+    <div class="card">
+        <h2>🔍 Data Head</h2>
+        <pre>{{ head|safe }}</pre>
+    </div>
+
+    <div class="card">
+        <h2>📊 Descriptive Stats</h2>
+        <pre>{{ describe|safe }}</pre>
+    </div>
+
+    <div class="card">
+        <h2>📁 Grouped Data</h2>
+        <pre>{{ groupby|safe }}</pre>
+    </div>
+
+    <div class="card">
+        <h2>📊 Bar Chart</h2>
+        <canvas id="barChart"></canvas>
+    </div>
+
+    <div class="card">
+        <h2>🥧 Pie Chart</h2>
+        <canvas id="pieChart"></canvas>
+    </div>
+
+    <div class="card">
+        <h2>📈 Line Chart</h2>
+        <canvas id="lineChart"></canvas>
+    </div>
+</div>
+
+<script>
+    const labels = {{ labels|tojson|safe }};
+    const values = {{ values|tojson|safe }};
+
+    if (labels && values) {
+        new Chart(document.getElementById("barChart"), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '{{ y_label }} vs {{ x_label }}',
+                    data: values,
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: { responsive: true }
+        });
+
+        new Chart(document.getElementById("pieChart"), {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: ['#f94144', '#f3722c', '#f8961e', '#f9c74f', '#90be6d', '#43aa8b', '#577590'],
+                    hoverOffset: 4
+                }]
+            },
+            options: { responsive: true }
+        });
+
+        new Chart(document.getElementById("lineChart"), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '{{ y_label }} Trend',
+                    data: values,
+                    fill: false,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    tension: 0.1
+                }]
+            },
+            options: { responsive: true }
+        });
+    }
+</script>
+
+</body>
+</html>
